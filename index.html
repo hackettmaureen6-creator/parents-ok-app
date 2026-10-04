@@ -448,12 +448,30 @@
     .how-card p { font-size: 14px; color: #aaa; line-height: 1.5; }
 
     footer {
-      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 44px 20px 36px;
+      color: #666;
       font-size: 13px;
-      color: #555;
-      padding: 40px 20px 30px;
-      line-height: 1.6;
+      letter-spacing: 0.3px;
     }
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #F3E9D2;
+      color: #B5544A;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 34px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    footer a { color: #999; text-decoration: none; }
+    footer a:hover { color: #F4D03F; }
 
     /* ---------- MOBILE ---------- */
     @media (max-width: 640px) {
@@ -871,8 +889,8 @@
   </div>
 
   <footer>
-    Parental Rating Index · Concept mockup<br>
-    Timestamps are illustrative. Verify before trusting your exit.
+    <a class="brand-mark" href="https://mosiealong.com" aria-label="Mosiealong">M</a>
+    <span><a href="https://mosiealong.com">Mosiealong</a> &copy; 2026</span>
   </footer>
 
   <script>

@@ -448,28 +448,21 @@
     .how-card p { font-size: 14px; color: #aaa; line-height: 1.5; }
 
     footer {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
+      text-align: center;
       padding: 44px 20px 36px;
       color: #666;
       font-size: 13px;
       letter-spacing: 0.3px;
     }
-    .brand-mark {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: #F3E9D2;
-      color: #B5544A;
-      font-family: Georgia, 'Times New Roman', serif;
-      font-size: 20px;
-      font-weight: 700;
-      line-height: 34px;
-      text-align: center;
-      flex-shrink: 0;
+    .brand-logo {
+      display: block;
+      width: 150px;
+      height: auto;
+      margin: 0 auto 14px;
+      opacity: 0.95;
+      transition: opacity 0.2s;
     }
+    .brand-logo:hover { opacity: 1; }
     footer a { color: #999; text-decoration: none; }
     footer a:hover { color: #F4D03F; }
 
@@ -889,7 +882,7 @@
   </div>
 
   <footer>
-    <a class="brand-mark" href="https://mosiealong.com" aria-label="Mosiealong">M</a>
+    <a href="https://mosiealong.com" aria-label="Mosiealong"><img class="brand-logo" src="logo.png" alt="Mosiealong" width="150" height="86"></a>
     <span><a href="https://mosiealong.com">Mosiealong</a> &copy; 2026</span>
   </footer>
 

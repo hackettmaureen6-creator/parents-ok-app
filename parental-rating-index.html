@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parental Rating Index</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23000'/%3E%3Cpath d='M16 26h32l-4 28H20z' fill='%23F4D03F'/%3E%3Cpath d='M22 26l3 28M30 26l1 28M36 26l-1 28M42 26l-3 28' stroke='%23fff' stroke-width='4'/%3E%3Ccircle cx='20' cy='22' r='6' fill='%23FFF8DC'/%3E%3Ccircle cx='32' cy='17' r='7' fill='%23FFF8DC'/%3E%3Ccircle cx='44' cy='22' r='6' fill='%23FFF8DC'/%3E%3Ccircle cx='26' cy='15' r='5' fill='%23FFF8DC'/%3E%3Ccircle cx='38' cy='14' r='5' fill='%23FFF8DC'/%3E%3C/svg%3E">
+  <meta name="theme-color" content="#000000">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=EB+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'EB Garamond', Garamond, Georgia, serif;
+      background: #000000;
+      color: #ffffff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ---------- NAV BAR ---------- */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid #222;
+    }
+    .nav-inner {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #F4D03F;
+      text-decoration: none;
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    .nav-brand svg { font-size: 20px; }
+    .nav-links {
+      display: flex;
+      gap: 6px;
+      list-style: none;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .nav-links::-webkit-scrollbar { display: none; }
+    .nav-links a {
+      display: inline-block;
+      padding: 7px 14px;
+      border-radius: 999px;
+      color: #cccccc;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    .nav-links a:hover { color: #F4D03F; border-color: #333; }
+    .nav-links a.active { background: #F4D03F; color: #000; }
+
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* ---------- HERO / POPCORN ---------- */
+    .hero {
+      text-align: center;
+      padding: 24px 0 8px;
+    }
+    .popcorn-section {
+      position: relative;
+      height: 190px;
+      margin-bottom: 8px;
+    }
+    .popcorn-bucket {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 150px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .bucket-top {
+      position: absolute;
+      top: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 112px;
+      height: 20px;
+      background: linear-gradient(to right, #C9A961 0%, #E8B923 50%, #C9A961 100%);
+      border-radius: 50% 50% 0 0;
+      border: 2px solid #B8925C;
+      z-index: 2;
+    }
+    .bucket-body {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 96px;
+      background: repeating-linear-gradient(to right, #F4D03F 0 14px, #ffffff 14px 28px);
+      border-radius: 0 0 10px 10px;
+      border: 2px solid #C9A961;
+      clip-path: polygon(0 0, 100% 0, 90% 100%, 10% 100%);
+      z-index: 1;
+    }
+    .bucket-label {
+      position: absolute;
+      bottom: 34px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      background: #c0392b;
+      color: #fff;
+      font-family: 'Playfair Display', serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 3px 10px;
+      border-radius: 3px;
+      pointer-events: none;
+    }
+    .popcorn-piece {
+      position: absolute;
+      top: 36px;
+      width: 12px;
+      height: 12px;
+      background: #FFF8DC;
+      border-radius: 45% 55% 50% 50%;
+      box-shadow: inset -2px -2px 0 #e8d9a8;
+      pointer-events: none;
+      z-index: 4;
+      animation: popfly 2.2s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+    }
+    @keyframes popfly {
+      0%   { opacity: 1; transform: translate(0, 0) scale(0.6) rotate(0deg); }
+      30%  { opacity: 1; transform: translate(calc(var(--tx) * 0.5), calc(var(--ty) * 0.9)) scale(1.1) rotate(120deg); }
+      100% { opacity: 0; transform: translate(var(--tx), calc(var(--ty) * 0.2 + 60px)) scale(0.8) rotate(300deg); }
+    }
+    .tap-hint {
+      font-size: 12px;
+      color: #666;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 42px;
+      line-height: 1.1;
+      margin-bottom: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #ffffff;
+    }
+    .header p {
+      font-size: 17px;
+      color: #cccccc;
+      line-height: 1.6;
+      max-width: 480px;
+      margin: 0 auto 28px;
+    }
+
+    /* ---------- LEGEND ---------- */
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: #aaaaaa;
+    }
+    .legend span { display: flex; align-items: center; gap: 6px; }
+    .legend em { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+    /* ---------- SEARCH ---------- */
+    .search-box { position: relative; margin-bottom: 20px; }
+    .search-box input {
+      width: 100%;
+      padding: 13px 16px 13px 42px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-family: inherit;
+      background: #1a1a1a;
+      color: #ffffff;
+      border: 1px solid #333;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-box input:focus { border-color: #F4D03F; }
+    .search-box input::placeholder { color: #666; }
+    .search-box > .search-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #F4D03F;
+      font-size: 16px;
+    }
+
+    .results-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: #777;
+      margin-bottom: 14px;
+      padding: 0 2px;
+    }
+    .results-meta b { color: #F4D03F; font-weight: 500; }
+
+    /* ---------- MOVIE CARDS ---------- */
+    .movie-card {
+      background: #1a1a1a;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      border: 1px solid #2a2a2a;
+      animation: slideUp 0.3s ease-out;
+      scroll-margin-top: 80px;
+    }
+    .movie-card.hidden { display: none; }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .movie-header {
+      padding: 16px 18px;
+      border-bottom: 1px solid #2a2a2a;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .movie-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 6px;
+      line-height: 1.2;
+    }
+    .movie-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      font-size: 14px;
+      color: #aaaaaa;
+    }
+    .meta-item { display: flex; align-items: center; gap: 5px; }
+    .meta-item svg { font-size: 13px; color: #777; }
+    .rating-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #2a2a2a;
+      border-radius: 4px;
+      font-weight: 600;
+      color: #F4D03F;
+      border: 1px solid #444;
+      font-size: 13px;
+    }
+
+    .score-circle {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      font-size: 20px;
+      font-weight: 600;
+      color: white;
+      border: 2px solid;
+    }
+    .score-green  { background: #1a4d2e; border-color: #4CAF50; color: #8ee29a; }
+    .score-yellow { background: #4d4200; border-color: #FFC107; color: #FFD54F; }
+    .score-red    { background: #4d1a1a; border-color: #F44336; color: #ff8a80; }
+
+    .verdict {
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 500;
+      border-bottom: 1px solid #2a2a2a;
+      background: #111;
+    }
+    .verdict-green  { color: #8ee29a; }
+    .verdict-yellow { color: #FFD54F; }
+    .verdict-red    { color: #ff8a80; }
+
+    .timeline-section { padding: 16px 18px; }
+    .timeline-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #F4D03F;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .timeline-bar {
+      width: 100%;
+      height: 22px;
+      background: #2a2a2a;
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+      margin-bottom: 6px;
+      border: 1px solid #3a3a3a;
+    }
+    .timeline-segment { height: 100%; min-width: 2px; }
+    .segment-safe    { background: #2d5a3d; }
+    .segment-caution { background: #6b5a00; }
+    .segment-alert   { background: #7a2020; }
+    .timeline-ticks {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 14px;
+      padding: 0 2px;
+    }
+
+    .timestamps { font-size: 15px; color: #cccccc; line-height: 1.5; }
+    .timestamp-item {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .timestamp-dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      position: relative;
+      top: -1px;
+    }
+    .dot-alert   { background: #F44336; }
+    .dot-caution { background: #FFC107; }
+    .dot-safe    { background: #4CAF50; }
+    .ts-time {
+      font-weight: 600;
+      color: #ffffff;
+      min-width: 44px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .note {
+      background: #0f0f0f;
+      padding: 12px 14px;
+      border-radius: 0 8px 8px 0;
+      font-size: 14px;
+      color: #bbbbbb;
+      line-height: 1.55;
+      margin-top: 14px;
+      border-left: 3px solid #F4D03F;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      padding: 14px 18px 18px;
+      border-top: 1px solid #2a2a2a;
+    }
+    .btn {
+      flex: 1;
+      min-width: 0;
+      padding: 12px 10px;
+      border: 1px solid #444;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .btn svg { font-size: 16px; flex-shrink: 0; }
+    .btn-primary { background: #F4D03F; color: #000; border-color: #F4D03F; }
+    .btn-primary:hover { background: #E8B923; }
+    .btn-secondary { background: transparent; color: #F4D03F; }
+    .btn-secondary:hover { background: #2a2a2a; border-color: #F4D03F; }
+
+    .empty-state {
+      display: none;
+      text-align: center;
+      padding: 48px 20px;
+      color: #777;
+      border: 1px dashed #333;
+      border-radius: 14px;
+    }
+    .empty-state.show { display: block; }
+    .empty-state .empty-icon { font-size: 32px; color: #F4D03F; margin: 0 auto 12px; display: block; }
+
+    /* ---------- HOW IT WORKS ---------- */
+    .how {
+      margin-top: 40px;
+      padding-top: 32px;
+      border-top: 1px solid #222;
+      scroll-margin-top: 80px;
+    }
+    .how h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      margin-bottom: 18px;
+      color: #fff;
+    }
+    .how-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px;
+    }
+    .how-card {
+      background: #111;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .how-card .how-icon { color: #F4D03F; font-size: 22px; margin-bottom: 10px; display: block; }
+    .how-card h3 { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+    .how-card p { font-size: 14px; color: #aaa; line-height: 1.5; }
+
+    footer {
+      text-align: center;
+      font-size: 13px;
+      color: #555;
+      padding: 40px 20px 30px;
+      line-height: 1.6;
+    }
+
+    /* ---------- MOBILE ---------- */
+    @media (max-width: 640px) {
+      .nav-inner { padding: 10px 14px; }
+      .nav-brand span { display: none; }
+      .nav-links a { padding: 6px 12px; font-size: 13px; }
+      .container { padding: 16px 14px; }
+      .popcorn-section { height: 170px; }
+      .popcorn-bucket { width: 104px; height: 132px; }
+      .bucket-top { width: 96px; top: 30px; }
+      .bucket-body { width: 86px; height: 84px; }
+      .header h1 { font-size: 32px; }
+      .header p { font-size: 15px; margin-bottom: 22px; }
+      .legend { gap: 12px; font-size: 12px; }
+      .movie-header { padding: 14px; }
+      .movie-title { font-size: 18px; }
+      .movie-meta { font-size: 13px; }
+      .score-circle { width: 42px; height: 42px; font-size: 18px; }
+      .verdict { padding: 9px 14px; font-size: 13px; }
+      .timeline-section { padding: 14px; }
+      .timestamps { font-size: 14px; }
+      .note { font-size: 13px; }
+      .action-buttons { padding: 12px 14px 14px; }
+      .btn { font-size: 14px; padding: 11px 8px; }
+    }
+    @media (max-width: 380px) {
+      .header h1 { font-size: 28px; }
+      .action-buttons { flex-direction: column; }
+      .ts-time { min-width: 40px; }
+    }
+  </style>
+</head>
+<body>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-ticket" viewBox="0 0 24 24"><path fill="currentColor" d="M2 9a3 3 0 0 0 0 6v3a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-3a3 3 0 0 0 0-6V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v3zm11-3h2v2h-2V6zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2z"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15zM16 16l5 5"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18zM12 7v5l3 2"/></symbol>
+      <symbol id="i-cal" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M4 7h16v13H4zM4 11h16M8 4v4M16 4v4"/></symbol>
+      <symbol id="i-couch" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4M3 13a2 2 0 0 1 4 0v2h10v-2a2 2 0 0 1 4 0v5H3v-5zM6 18v2M18 18v2"/></symbol>
+      <symbol id="i-info" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18zM12 11v5M12 8h.01"/></symbol>
+      <symbol id="i-walk" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M13 4a1.5 1.5 0 1 0 0 .01M10 21l2-6M9 10l3-1 2 3 3 1M9 10l-2 4M12 9v3l3 4 1 5M17 13l3-1"/></symbol>
+      <symbol id="i-ban" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18zM5.6 5.6l12.8 12.8"/></symbol>
+      <symbol id="i-film" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M4 4h16v16H4zM4 9h16M4 15h16M9 4v16M15 4v16"/></symbol>
+      <symbol id="i-map" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M3 12h18M6 9v6M12 7v10M18 9v6"/></symbol>
+      <symbol id="i-exit" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M13 4h5a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-5M4 12h10M10 8l4 4-4 4"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- ===== NAV BAR ===== -->
+  <nav class="nav" id="top">
+    <div class="nav-inner">
+      <a class="nav-brand" href="#top" aria-label="Parental Rating Index home">
+        <svg width="1em" height="1em" aria-hidden="true"><use href="#i-ticket"/></svg>
+        <span>PRI</span>
+      </a>
+      <ul class="nav-links" role="tablist">
+        <li><a href="#movies" class="active" data-filter="all">All</a></li>
+        <li><a href="#movies" data-filter="green">Safe</a></li>
+        <li><a href="#movies" data-filter="yellow">Caution</a></li>
+        <li><a href="#movies" data-filter="red">Avoid</a></li>
+        <li><a href="#how" data-filter="how">How it works</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+      <div class="popcorn-section">
+        <div class="popcorn-bucket" id="popcornBucket" role="button" aria-label="Pop some popcorn" tabindex="0">
+          <div class="bucket-top"></div>
+          <div class="bucket-body"></div>
+          <div class="bucket-label">POPCORN</div>
+        </div>
+      </div>
+      <div class="tap-hint">Tap or hover the bucket</div>
+
+      <div class="header">
+        <h1>Parental Rating Index</h1>
+        <p>Know when the awkward moments will happen before they do and plan accordingly</p>
+      </div>
+
+      <div class="legend">
+        <span><em style="background:#4CAF50"></em> Safe to stay</span>
+        <span><em style="background:#FFC107"></em> Quick exit needed</span>
+        <span><em style="background:#F44336"></em> Watch it solo</span>
+      </div>
+    </section>
+
+    <!-- ===== SEARCH ===== -->
+    <section id="movies">
+      <div class="search-box">
+        <svg class="search-icon" width="1em" height="1em" aria-hidden="true"><use href="#i-search"/></svg>
+        <input type="search" id="searchInput" placeholder="Search a movie…" autocomplete="off" aria-label="Search movies">
+      </div>
+
+      <div class="results-meta">
+        <span>Showing <b id="resultCount">9</b> of <b>9</b> movies</span>
+        <span id="filterLabel">All ratings</span>
+      </div>
+
+      <!-- Movie 1 -->
+      <article class="movie-card" data-score="green" data-title="top gun maverick">
+        <div class="movie-header">
+          <div>
+            <div class="movie-title">Top Gun: Maverick</div>
+            <div class="movie-meta">
+              <span class="rating-badge">PG-13</span>
+              <span class="meta-item"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-clock"/></svg> 2h 11m</span>
+              <span class="meta-item"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-cal"/></svg> 2022</span>
+            </div>
+          </div>
+          <div class="score-circle score-green" aria-label="Safe">✓</div>
+        </div>
+        <div class="verdict verdict-green">Safe to stay the whole time</div>
+        <div class="timeline-section">
+          <div class="timeline-label">Awkward moment map</div>
+          <div class="timeline-bar">
+            <div class="timeline-segment segment-safe" style="flex: 57"></div>
+            <div class="timeline-segment segment-caution" style="flex: 3"></div>
+            <div class="timeline-segment segment-safe" style="flex: 71"></div>
+          </div>
+          <div class="timeline-ticks"><span>0:00</span><span>1:05</span><span>2:11</span></div>
+          <div class="timestamps">
+            <div class="timestamp-item"><span class="timestamp-dot dot-caution"></span><span class="ts-time">0:57</span><span>Brief kiss and bedroom scene — nothing shown, fully clothed by the next cut</span></div>
+          </div>
+          <div class="note">You're good. One tasteful moment and it's over in under a minute. Stay for the flying.</div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-primary"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-couch"/></svg> Watch with parents</button>
+          <button class="btn btn-secondary"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-info"/></svg> Details</button>
+        </div>
+      </article>
+
+      <!-- Movie 2 -->
+      <article class="movie-card" data-score="yellow" data-title="oppenheimer">
+        <div class="movie-header">
+          <div>
+            <div class="movie-title">Oppenheimer</div>
+            <div class="movie-meta">
+              <span class="rating-badge">R</span>
+              <span class="meta-item"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-clock"/></svg> 3h 0m</span>
+              <span class="meta-item"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-cal"/></svg> 2023</span>
+            </div>
+          </div>
+          <div class="score-circle score-yellow" aria-label="Caution">!</div>
+        </div>
+        <div class="verdict verdict-yellow">Two exits needed — plan your snack runs</div>
+        <div class="timeline-section">
+          <div class="timeline-label">Awkward moment map</div>
+          <div class="timeline-bar">
+            <div class="timeline-segment segment-safe" style="flex: 38"></div>
+            <div class="timeline-segment segment-alert" style="flex: 4"></div>
+            <div class="timeline-segment segment-safe" style="flex: 68"></div>
+            <div class="timeline-segment segment-alert" style="flex: 3"></div>
+            <div class="timeline-segment segment-safe" style="flex: 67"></div>
+          </div>
+          <div class="timeline-ticks"><span>0:00</span><span>1:30</span><span>3:00</span></div>
+          <div class="timestamps">
+            <div class="timestamp-item"><span class="timestamp-dot dot-alert"></span><span class="ts-time">0:38</span><span>Extended nude scene with Jean Tatlock — this is the big one</span></div>
+            <div class="timestamp-item"><span class="timestamp-dot dot-alert"></span><span class="ts-time">1:50</span><span>Brief nudity during the security hearing sequence</span></div>
+            <div class="timestamp-item"><span class="timestamp-dot dot-caution"></span><span class="ts-time">All</span><span>Strong language throughout</span></div>
+          </div>
+          <div class="note">Go refill drinks at 0:38 and give it a solid four minutes. The second one is quick — a well-timed phone check covers it.</div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-primary"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-walk"/></svg> Plan my exit</button>
+          <button class="btn btn-secondary"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-info"/></svg> Details</button>
+        </div>
+      </article>
+
+
+      <article class="movie-card" data-score="green" data-title="final destination 2000 ali larter">
+        <div class="movie-header">
+          <div>
+            <div class="movie-title">Final Destination</div>
+            <div class="movie-meta">
+              <span class="rating-badge">R</span>
+              <span class="meta-item"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-clock"/></svg> 1h 38m</span>
+              <span class="meta-item"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-cal"/></svg> 2000</span>
+            </div>
+          </div>
+          <div class="score-circle score-green" aria-label="Safe">✓</div>
+        </div>
+        <div class="verdict verdict-green">Safe to stay — the one that started it all</div>
+        <div class="timeline-section">
+          <div class="timeline-label">Awkward moment map</div>
+          <div class="timeline-bar"><div class="timeline-segment segment-safe" style="flex: 98"></div></div>
+          <div class="timeline-ticks"><span>0:00</span><span>0:49</span><span>1:38</span></div>
+          <div class="timestamps"><div class="timestamp-item"><span class="timestamp-dot dot-caution"></span><span class="ts-time">All</span><span>Graphic deaths — the bathtub, the bus, the kitchen</span></div><div class="timestamp-item"><span class="timestamp-dot dot-safe"></span><span class="ts-time">—</span><span>No sex scenes, no nudity (one makeout that goes nowhere)</span></div></div>
+          <div class="note">Ali Larter as Clear Rivers, zero awkward moments. The only thing to look away from is Tod in the bathroom.</div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-primary"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-couch"/></svg> Watch with parents</button>
+          <button class="btn btn-secondary"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-info"/></svg> Details</button>
+        </div>
+      </article>
+
+      <article class="movie-card" data-score="yellow" data-title="final destination 2 2003 ali larter">
+        <div class="movie-header">
+          <div>
+            <div class="movie-title">Final Destination 2</div>
+            <div class="movie-meta">
+              <span class="rating-badge">R</span>
+              <span class="meta-item"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-clock"/></svg> 1h 30m</span>
+              <span class="meta-item"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-cal"/></svg> 2003</span>
+            </div>
+          </div>
+          <div class="score-circle score-yellow" aria-label="Caution">!</div>
+        </div>
+        <div class="verdict verdict-yellow">One quick flash early — then clear skies</div>
+        <div class="timeline-section">
+          <div class="timeline-label">Awkward moment map</div>
+          <div class="timeline-bar"><div class="timeline-segment segment-safe" style="flex: 12"></div><div class="timeline-segment segment-caution" style="flex: 2"></div><div class="timeline-segment segment-safe" style="flex: 76"></div></div>
+          <div class="timeline-ticks"><span>0:00</span><span>0:45</span><span>1:30</span></div>
+          <div class="timestamps"><div class="timestamp-item"><span class="timestamp-dot dot-caution"></span><span class="ts-time">~0:12</span><span>Brief topless flash in an apartment scene — blink and it's gone</span></div><div class="timestamp-item"><span class="timestamp-dot dot-caution"></span><span class="ts-time">All</span><span>Log-truck pileup and extremely gruesome deaths</span></div><div class="timestamp-item"><span class="timestamp-dot dot-caution"></span><span class="ts-time">All</span><span>Drug references and strong language</span></div></div>
+          <div class="note">Ali Larter is back and so is the gore. One early flash of nudity to time a drink refill around, then nothing but creative accidents.</div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-primary"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-walk"/></svg> Plan my exit</button>
+          <button class="btn btn-secondary"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-info"/></svg> Details</button>
+        </div>
+      </article>
+
+      <article class="movie-card" data-score="yellow" data-title="final destination 3 2006">
+        <div class="movie-header">
+          <div>
+            <div class="movie-title">Final Destination 3</div>
+            <div class="movie-meta">
+              <span class="rating-badge">R</span>
+              <span class="meta-item"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-clock"/></svg> 1h 33m</span>
+              <span class="meta-item"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-cal"/></svg> 2006</span>
+            </div>
+          </div>
+          <div class="score-circle score-yellow" aria-label="Caution">!</div>
+        </div>
+        <div class="verdict verdict-yellow">Tanning-bed scene — plan to be elsewhere</div>
+        <div class="timeline-section">
+          <div class="timeline-label">Awkward moment map</div>
+          <div class="timeline-bar"><div class="timeline-segment segment-safe" style="flex: 22"></div><div class="timeline-segment segment-caution" style="flex: 5"></div><div class="timeline-segment segment-safe" style="flex: 66"></div></div>
+          <div class="timeline-ticks"><span>0:00</span><span>0:46</span><span>1:33</span></div>
+          <div class="timestamps"><div class="timestamp-item"><span class="timestamp-dot dot-caution"></span><span class="ts-time">~0:22</span><span>Tanning salon scene — two characters topless for a few minutes before the beds lock</span></div><div class="timestamp-item"><span class="timestamp-dot dot-caution"></span><span class="ts-time">All</span><span>Roller-coaster derailment and graphic deaths</span></div><div class="timestamp-item"><span class="timestamp-dot dot-caution"></span><span class="ts-time">All</span><span>Strong language, some crude camera-phone humor</span></div></div>
+          <div class="note">The famous tanning-bed sequence is the one to miss. Step out at 0:22 and give it a full five minutes.</div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-primary"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-walk"/></svg> Plan my exit</button>
+          <button class="btn btn-secondary"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-info"/></svg> Details</button>
+        </div>
+      </article>
+
+      <article class="movie-card" data-score="yellow" data-title="the final destination 4 2009">
+        <div class="movie-header">
+          <div>
+            <div class="movie-title">The Final Destination</div>
+            <div class="movie-meta">
+              <span class="rating-badge">R</span>
+              <span class="meta-item"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-clock"/></svg> 1h 22m</span>
+              <span class="meta-item"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-cal"/></svg> 2009</span>
+            </div>
+          </div>
+          <div class="score-circle score-yellow" aria-label="Caution">!</div>
+        </div>
+        <div class="verdict verdict-yellow">One sex scene — short but not subtle</div>
+        <div class="timeline-section">
+          <div class="timeline-label">Awkward moment map</div>
+          <div class="timeline-bar"><div class="timeline-segment segment-safe" style="flex: 30"></div><div class="timeline-segment segment-alert" style="flex: 3"></div><div class="timeline-segment segment-safe" style="flex: 49"></div></div>
+          <div class="timeline-ticks"><span>0:00</span><span>0:41</span><span>1:22</span></div>
+          <div class="timestamps"><div class="timestamp-item"><span class="timestamp-dot dot-alert"></span><span class="ts-time">~0:30</span><span>Sex scene with Hunt and a pool-side hookup — brief nudity</span></div><div class="timestamp-item"><span class="timestamp-dot dot-caution"></span><span class="ts-time">All</span><span>Speedway crash, escalator, car wash — graphic throughout</span></div><div class="timestamp-item"><span class="timestamp-dot dot-caution"></span><span class="ts-time">All</span><span>Strong language</span></div></div>
+          <div class="note">Shortest film in the series and the one scene is early. Refill the popcorn at the half-hour mark and you're clear.</div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-primary"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-walk"/></svg> Plan my exit</button>
+          <button class="btn btn-secondary"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-info"/></svg> Details</button>
+        </div>
+      </article>
+
+            <article class="movie-card" data-score="green" data-title="final destination 5">
+        <div class="movie-header">
+          <div>
+            <div class="movie-title">Final Destination 5</div>
+            <div class="movie-meta">
+              <span class="rating-badge">R</span>
+              <span class="meta-item"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-clock"/></svg> 1h 32m</span>
+              <span class="meta-item"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-cal"/></svg> 2011</span>
+            </div>
+          </div>
+          <div class="score-circle score-green" aria-label="Safe">✓</div>
+        </div>
+        <div class="verdict verdict-green">Safe to stay — violence only</div>
+        <div class="timeline-section">
+          <div class="timeline-label">Awkward moment map</div>
+          <div class="timeline-bar">
+            <div class="timeline-segment segment-safe" style="flex: 92"></div>
+          </div>
+          <div class="timeline-ticks"><span>0:00</span><span>0:46</span><span>1:32</span></div>
+          <div class="timestamps">
+            <div class="timestamp-item"><span class="timestamp-dot dot-caution"></span><span class="ts-time">All</span><span>Graphic death sequences and blood</span></div>
+            <div class="timestamp-item"><span class="timestamp-dot dot-safe"></span><span class="ts-time">—</span><span>No intimate scenes, no nudity</span></div>
+          </div>
+          <div class="note">Zero romantic content. Grab the popcorn and keep your seat — the only thing getting undressed is a gymnast's spine.</div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-primary"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-couch"/></svg> Watch with parents</button>
+          <button class="btn btn-secondary"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-info"/></svg> Details</button>
+        </div>
+      </article>
+
+            <article class="movie-card" data-score="yellow" data-title="final destination bloodlines">
+        <div class="movie-header">
+          <div>
+            <div class="movie-title">Final Destination Bloodlines</div>
+            <div class="movie-meta">
+              <span class="rating-badge">R</span>
+              <span class="meta-item"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-clock"/></svg> 1h 50m</span>
+              <span class="meta-item"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-cal"/></svg> 2025</span>
+            </div>
+          </div>
+          <div class="score-circle score-yellow" aria-label="Caution">!</div>
+        </div>
+        <div class="verdict verdict-yellow">Mostly gore — one brief moment to watch for</div>
+        <div class="timeline-section">
+          <div class="timeline-label">Awkward moment map</div>
+          <div class="timeline-bar">
+            <div class="timeline-segment segment-safe" style="flex: 35"></div>
+            <div class="timeline-segment segment-caution" style="flex: 2"></div>
+            <div class="timeline-segment segment-safe" style="flex: 73"></div>
+          </div>
+          <div class="timeline-ticks"><span>0:00</span><span>0:55</span><span>1:50</span></div>
+          <div class="timestamps">
+            <div class="timestamp-item"><span class="timestamp-dot dot-caution"></span><span class="ts-time">~0:35</span><span>Brief making-out scene — no nudity</span></div>
+            <div class="timestamp-item"><span class="timestamp-dot dot-caution"></span><span class="ts-time">All</span><span>Graphic, creative death scenes and gore</span></div>
+            <div class="timestamp-item"><span class="timestamp-dot dot-caution"></span><span class="ts-time">All</span><span>Strong language</span></div>
+          </div>
+          <div class="note">One quick bathroom break around the half-hour mark, then it's all elaborate kills. Your parents will be covering their eyes for other reasons.</div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-primary"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-walk"/></svg> Plan my exit</button>
+          <button class="btn btn-secondary"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-info"/></svg> Details</button>
+        </div>
+      </article>
+
+
+      <!-- Movie 5 -->
+      <article class="movie-card" data-score="red" data-title="saltburn">
+        <div class="movie-header">
+          <div>
+            <div class="movie-title">Saltburn</div>
+            <div class="movie-meta">
+              <span class="rating-badge">R</span>
+              <span class="meta-item"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-clock"/></svg> 2h 11m</span>
+              <span class="meta-item"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-cal"/></svg> 2023</span>
+            </div>
+          </div>
+          <div class="score-circle score-red" aria-label="Avoid">✕</div>
+        </div>
+        <div class="verdict verdict-red">Do not attempt. Watch this one alone.</div>
+        <div class="timeline-section">
+          <div class="timeline-label">Awkward moment map</div>
+          <div class="timeline-bar">
+            <div class="timeline-segment segment-safe" style="flex: 40"></div>
+            <div class="timeline-segment segment-alert" style="flex: 5"></div>
+            <div class="timeline-segment segment-safe" style="flex: 20"></div>
+            <div class="timeline-segment segment-alert" style="flex: 6"></div>
+            <div class="timeline-segment segment-caution" style="flex: 25"></div>
+            <div class="timeline-segment segment-alert" style="flex: 8"></div>
+            <div class="timeline-segment segment-caution" style="flex: 20"></div>
+            <div class="timeline-segment segment-alert" style="flex: 7"></div>
+          </div>
+          <div class="timeline-ticks"><span>0:00</span><span>1:05</span><span>2:11</span></div>
+          <div class="timestamps">
+            <div class="timestamp-item"><span class="timestamp-dot dot-alert"></span><span class="ts-time">0:40</span><span>The bathtub scene. You know the one.</span></div>
+            <div class="timestamp-item"><span class="timestamp-dot dot-alert"></span><span class="ts-time">1:05</span><span>Graveyard scene — do not be in the room</span></div>
+            <div class="timestamp-item"><span class="timestamp-dot dot-alert"></span><span class="ts-time">1:35</span><span>Multiple explicit scenes in sequence</span></div>
+            <div class="timestamp-item"><span class="timestamp-dot dot-alert"></span><span class="ts-time">2:04</span><span>Full-frontal nude dance through the house, until credits</span></div>
+          </div>
+          <div class="note">There is no exit plan that survives this film. Suggest literally anything else.</div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-secondary"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-ban"/></svg> Maybe next time</button>
+          <button class="btn btn-secondary"><svg width="1em" height="1em" aria-hidden="true"><use href="#i-info"/></svg> Details</button>
+        </div>
+      </article>
+
+      <div class="empty-state" id="emptyState">
+        <svg class="empty-icon" width="1em" height="1em" aria-hidden="true"><use href="#i-film"/></svg>
+        No movies match that search. Try another title or clear the filter.
+      </div>
+    </section>
+
+    <!-- ===== HOW IT WORKS ===== -->
+    <section class="how" id="how">
+      <h2>How it works</h2>
+      <div class="how-grid">
+        <div class="how-card">
+          <svg class="how-icon" width="1em" height="1em" aria-hidden="true"><use href="#i-search"/></svg>
+          <h3>Search the title</h3>
+          <p>Type any movie and get an instant verdict before you press play.</p>
+        </div>
+        <div class="how-card">
+          <svg class="how-icon" width="1em" height="1em" aria-hidden="true"><use href="#i-map"/></svg>
+          <h3>Read the map</h3>
+          <p>The timeline bar shows exactly where the awkward stretches land in the runtime.</p>
+        </div>
+        <div class="how-card">
+          <svg class="how-icon" width="1em" height="1em" aria-hidden="true"><use href="#i-exit"/></svg>
+          <h3>Time your exit</h3>
+          <p>Each timestamp tells you when to go refill the popcorn and how long to stay gone.</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    Parental Rating Index · Concept mockup<br>
+    Timestamps are illustrative. Verify before trusting your exit.
+  </footer>
+
+  <script>
+    /* ---------- Popcorn ---------- */
+    const bucket = document.getElementById('popcornBucket');
+    let lastPop = 0;
+
+    function createPopcorn() {
+      const p = document.createElement('div');
+      p.className = 'popcorn-piece';
+      p.style.left = 'calc(50% + ' + ((Math.random() - 0.5) * 70) + 'px)';
+      const angle = (Math.random() * 140 - 70) * Math.PI / 180;
+      const power = 90 + Math.random() * 110;
+      p.style.setProperty('--tx', (Math.sin(angle) * power) + 'px');
+      p.style.setProperty('--ty', (-Math.cos(angle) * power - 60) + 'px');
+      bucket.appendChild(p);
+      setTimeout(() => p.remove(), 2300);
+    }
+
+    function pop(count) {
+      const now = Date.now();
+      if (now - lastPop < 900) return;
+      lastPop = now;
+      for (let i = 0; i < count; i++) setTimeout(createPopcorn, i * 110);
+    }
+
+    bucket.addEventListener('mouseenter', () => pop(6));
+    bucket.addEventListener('click', () => pop(14));
+    bucket.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pop(14); } });
+    setTimeout(() => pop(7), 700);
+
+    /* ---------- Filter + search ---------- */
+    const cards = Array.from(document.querySelectorAll('.movie-card'));
+    const navLinks = document.querySelectorAll('.nav-links a[data-filter]');
+    const searchInput = document.getElementById('searchInput');
+    const resultCount = document.getElementById('resultCount');
+    const filterLabel = document.getElementById('filterLabel');
+    const emptyState = document.getElementById('emptyState');
+    const labels = { all: 'All ratings', green: 'Safe to stay', yellow: 'Quick exit needed', red: 'Watch it solo' };
+    let activeFilter = 'all';
+
+    function applyFilters() {
+      const q = searchInput.value.trim().toLowerCase();
+      let shown = 0;
+      cards.forEach(card => {
+        const matchFilter = activeFilter === 'all' || card.dataset.score === activeFilter;
+        const matchSearch = !q || card.dataset.title.includes(q);
+        const visible = matchFilter && matchSearch;
+        card.classList.toggle('hidden', !visible);
+        if (visible) shown++;
+      });
+      resultCount.textContent = shown;
+      filterLabel.textContent = labels[activeFilter];
+      emptyState.classList.toggle('show', shown === 0);
+    }
+
+    navLinks.forEach(link => {
+      link.addEventListener('click', e => {
+        const f = link.dataset.filter;
+        if (f === 'how') return;
+        activeFilter = f;
+        navLinks.forEach(l => l.classList.toggle('active', l === link));
+        applyFilters();
+      });
+    });
+
+    searchInput.addEventListener('input', applyFilters);
+
+    /* ---------- Details buttons (demo) ---------- */
+    document.querySelectorAll('.btn-secondary').forEach(btn => {
+      if (btn.textContent.includes('Details')) {
+        btn.addEventListener('click', () => {
+          const card = btn.closest('.movie-card');
+          const ts = card.querySelector('.timestamps');
+          ts.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          ts.style.transition = 'background 0.3s';
+          ts.style.background = '#2a2410';
+          setTimeout(() => ts.style.background = '', 700);
+        });
+      }
+    });
+  </script>
+</body>
+</html>
